@@ -89,7 +89,6 @@ export async function fetchAllFundingRates(
         exchanges: {
           hyperliquid: rate,
         },
-        predicted: predictedMap.get(symbol) ?? null,
       });
     });
 

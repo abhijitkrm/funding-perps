@@ -30,7 +30,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: null,
     },
-    predicted: 0.0201,
   },
   {
     symbol: 'ETH',
@@ -47,7 +46,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: 0.0270,
     },
-    predicted: null,
   },
   {
     symbol: 'SOL',
@@ -64,7 +62,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: -0.0300,
       lbank: 0.0300,
     },
-    predicted: null,
   },
   {
     symbol: 'XRP',
@@ -81,7 +78,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: 0.0183,
     },
-    predicted: null,
   },
   {
     symbol: 'DOGE',
@@ -98,7 +94,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: -0.0300,
       lbank: 0.0300,
     },
-    predicted: null,
   },
   {
     symbol: 'BNB',
@@ -115,7 +110,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: null,
       lbank: 0.0000,
     },
-    predicted: null,
   },
   {
     symbol: 'HYPE',
@@ -132,7 +126,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0400,
       lbank: 0.0300,
     },
-    predicted: null,
   },
   {
     symbol: 'ZEC',
@@ -149,7 +142,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: 0.0271,
     },
-    predicted: null,
   },
   {
     symbol: 'BCH',
@@ -166,7 +158,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: -0.0099,
     },
-    predicted: null,
   },
   {
     symbol: 'SUI',
@@ -183,7 +174,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: 0.0300,
     },
-    predicted: null,
   },
   {
     symbol: 'ADA',
@@ -200,7 +190,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: 0.0300,
     },
-    predicted: null,
   },
   {
     symbol: 'LINK',
@@ -217,7 +206,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: 0.0300,
     },
-    predicted: null,
   },
   {
     symbol: 'LTC',
@@ -234,7 +222,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: 0.0300,
     },
-    predicted: null,
   },
   {
     symbol: 'AVAX',
@@ -251,7 +238,6 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0300,
       lbank: 0.0300,
     },
-    predicted: null,
   },
   {
     symbol: 'ASTER',
@@ -268,6 +254,5 @@ export const mockFundingRates: FundingRate[] = [
       whitebit: 0.0400,
       lbank: null,
     },
-    predicted: null,
   },
 ];
