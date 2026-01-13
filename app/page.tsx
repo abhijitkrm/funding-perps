@@ -5,6 +5,7 @@ import { TopNav } from "@/components/top-nav";
 import { FundingExtremes } from "@/components/funding-extremes";
 import { Header } from "@/components/header";
 import { FundingRatesTable } from "@/components/funding-rates-table";
+import { Footer } from "@/components/footer";
 import { useFundingStore } from "@/lib/store/funding-store";
 import { Exchange } from "@/types/funding";
 
@@ -46,7 +47,7 @@ export default function Home() {
   console.log('Render - loading:', isLoading, 'error:', error, 'fundingRates:', fundingRates.length, 'timeframe:', timeframe);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <TopNav onSearch={setSearchQuery} />
       
       <div className="bg-card py-6">
@@ -88,6 +89,7 @@ export default function Home() {
           />
         )}
       </main>
+      <Footer />
     </div>
   );
 }

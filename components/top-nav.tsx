@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Image from "next/image";
 
 interface TopNavProps {
   onSearch: (query: string) => void;
@@ -21,7 +22,16 @@ export function TopNav({ onSearch }: TopNavProps) {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <div className="text-xl font-bold">fundingperps</div>
+            <div className="flex items-center gap-2">
+              <Image 
+                src="/fundingperpslogo.png" 
+                alt="fundingperps logo" 
+                width={32} 
+                height={32}
+                className="h-8 w-8"
+              />
+              <span className="text-xl font-bold">fundingperps</span>
+            </div>
           </div>
           
           <div className="flex items-center gap-3">
