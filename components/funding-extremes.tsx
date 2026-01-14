@@ -2,17 +2,9 @@
 
 import { useFundingStore } from "@/lib/store/funding-store";
 import { useMemo } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 export function FundingExtremes() {
-  const { metaData, lighterRates, asterRates, extendedRates } = useFundingStore();
+  const { metaData, lighterRates, asterRates } = useFundingStore();
 
   const extremes = useMemo(() => {
     if (!metaData) return { highest: [], lowest: [] };
@@ -38,9 +30,6 @@ export function FundingExtremes() {
     asterRates.forEach((rate, symbol) => {
       allRatesWithSymbol.push({ symbol, rate, exchange: 'Aster' });
     });
-    extendedRates.forEach((rate, symbol) => {
-      allRatesWithSymbol.push({ symbol, rate, exchange: 'Extended' });
-    });
 
     // Sort and get top 5 highest and lowest
     const sorted = [...allRatesWithSymbol].sort((a, b) => b.rate - a.rate);
@@ -49,7 +38,7 @@ export function FundingExtremes() {
       highest: sorted.slice(0, 5),
       lowest: sorted.slice(-5).reverse(),
     };
-  }, [metaData, lighterRates, asterRates, extendedRates]);
+  }, [metaData, lighterRates, asterRates]);
 
   const formatRate = (rate: number) => {
     const percentage = (rate * 100).toFixed(4);
@@ -65,66 +54,38 @@ export function FundingExtremes() {
   return (
     <div className="bg-card">
       <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 font-[family-name:var(--font-ibm-plex-sans)] font-normal">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <h3 className="text-lg font-semibold mb-4">Highest Funding Rate</h3>
-            <div className="rounded-lg border bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead>Asset (DEX)</TableHead>
-                    <TableHead className="text-right">Rate</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {extremes.highest.map((item, index) => (
-                    <TableRow key={index} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{item.symbol}</span>
-                          <span className="text-xs text-muted-foreground">({item.exchange})</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className={`font-semibold ${getRateColor(item.rate)}`}>
-                          {formatRate(item.rate)}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="space-y-2">
+              {extremes.highest.map((item, index) => (
+                <div key={index} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{item.symbol}</span>
+                    <span className="text-xs text-muted-foreground">{item.exchange}</span>
+                  </div>
+                  <span className={`font-semibold ${getRateColor(item.rate)}`}>
+                    {formatRate(item.rate)}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
           
           <div>
             <h3 className="text-lg font-semibold mb-4">Lowest Funding Rate</h3>
-            <div className="rounded-lg border bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead>Asset (DEX)</TableHead>
-                    <TableHead className="text-right">Rate</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {extremes.lowest.map((item, index) => (
-                    <TableRow key={index} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{item.symbol}</span>
-                          <span className="text-xs text-muted-foreground">({item.exchange})</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className={`font-semibold ${getRateColor(item.rate)}`}>
-                          {formatRate(item.rate)}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="space-y-2">
+              {extremes.lowest.map((item, index) => (
+                <div key={index} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{item.symbol}</span>
+                    <span className="text-xs text-muted-foreground">{item.exchange}</span>
+                  </div>
+                  <span className={`font-semibold ${getRateColor(item.rate)}`}>
+                    {formatRate(item.rate)}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

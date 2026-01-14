@@ -28,6 +28,35 @@ export interface HyperliquidMetaAndAssetCtxs {
   assetCtxs: HyperliquidAssetContext[];
 }
 
+export interface SpotToken {
+  name: string;
+  szDecimals: number;
+  weiDecimals: number;
+  index: number;
+  tokenId: string;
+  isCanonical: boolean;
+}
+
+export interface SpotPair {
+  name: string;
+  tokens: [number, number];
+  index: number;
+  isCanonical: boolean;
+}
+
+export interface SpotAssetContext {
+  dayNtlVlm: string;
+  markPx: string;
+  midPx: string;
+  prevDayPx: string;
+}
+
+export interface SpotMetaAndAssetCtxs {
+  tokens: SpotToken[];
+  universe: SpotPair[];
+  assetCtxs: SpotAssetContext[];
+}
+
 export async function getMetaAndAssetCtxs(): Promise<HyperliquidMetaAndAssetCtxs> {
   const response = await fetch(HYPERLIQUID_API_URL, {
     method: "POST",
@@ -153,4 +182,35 @@ export async function getHistoricalFundingRates(
   );
 
   return fundingMap;
+}
+
+export async function getSpotMetaAndAssetCtxs(): Promise<SpotMetaAndAssetCtxs> {
+  const response = await fetch(HYPERLIQUID_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: "spotMetaAndAssetCtxs",
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Hyperliquid Spot API error: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  
+  if (Array.isArray(data) && data.length >= 2) {
+    const metaData = data[0];
+    const assetCtxs = data[1];
+    
+    return {
+      tokens: metaData.tokens || [],
+      universe: metaData.universe || [],
+      assetCtxs: assetCtxs || [],
+    };
+  }
+
+  throw new Error('Invalid response structure from Hyperliquid Spot API');
 }

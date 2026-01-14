@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { FundingRate } from '@/types/funding';
-import { getMetaAndAssetCtxs } from '@/lib/api/hyperliquid';
-import { getLighterFundingRates } from '@/lib/api/lighter';
+import { getMetaAndAssetCtxs, getSpotMetaAndAssetCtxs } from '@/lib/api/hyperliquid';
+import { getLighterFundingRates, getLighterArbitrageData, LighterSpotMarket } from '@/lib/api/lighter';
 import { getAsterFundingRates } from '@/lib/api/aster';
-import { getExtendedFundingRates, getExtendedMarkets, updateExtendedMarketRate } from '@/lib/api/extended';
+import { SpotMarketData } from '@/types/arbitrage';
 
 interface MetaData {
   universe: Array<{ name: string }>;
@@ -14,14 +14,15 @@ interface FundingStore {
   metaData: MetaData | null;
   lighterRates: Map<string, number>;
   asterRates: Map<string, number>;
-  extendedRates: Map<string, number>;
-  extendedMarkets: Array<{ name: string; symbol: string }> | null;
+  spotMarkets: Map<string, SpotMarketData>;
+  lighterSpotMarkets: Map<string, LighterSpotMarket>;
   isLoading: boolean;
   error: string | null;
   lastFetched: number | null;
   
   fetchMetaData: () => Promise<void>;
-  startExtendedProgressiveFetch: () => void;
+  fetchSpotMarkets: () => Promise<void>;
+  fetchLighterSpotMarkets: () => Promise<void>;
   getFundingRates: (timeframe: string) => FundingRate[];
 }
 
@@ -29,8 +30,8 @@ export const useFundingStore = create<FundingStore>((set, get) => ({
   metaData: null,
   lighterRates: new Map(),
   asterRates: new Map(),
-  extendedRates: new Map(),
-  extendedMarkets: null,
+  spotMarkets: new Map(),
+  lighterSpotMarkets: new Map(),
   isLoading: false,
   error: null,
   lastFetched: null,
@@ -48,26 +49,21 @@ export const useFundingStore = create<FundingStore>((set, get) => ({
 
     try {
       console.log('Fetching meta data from APIs...');
-      const [metaData, lighterRates, asterRates, extendedRates] = await Promise.all([
+      const [metaData, lighterRates, asterRates] = await Promise.all([
         getMetaAndAssetCtxs(),
         getLighterFundingRates(),
         getAsterFundingRates(),
-        getExtendedFundingRates(),
       ]);
 
       set({
         metaData,
         lighterRates,
         asterRates,
-        extendedRates,
         isLoading: false,
         lastFetched: Date.now(),
       });
 
       console.log('Meta data cached successfully');
-      
-      // Start progressive fetching of Extended market stats in background
-      get().startExtendedProgressiveFetch();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch funding rates';
       set({ error: errorMessage, isLoading: false });
@@ -76,41 +72,44 @@ export const useFundingStore = create<FundingStore>((set, get) => ({
     }
   },
 
-  startExtendedProgressiveFetch: async () => {
+  fetchSpotMarkets: async () => {
     try {
-      const markets = await getExtendedMarkets();
-      const marketList = markets.map(m => ({ name: m.name, symbol: m.name.split('-')[0] }));
+      console.log('Fetching spot market data...');
+      const spotData = await getSpotMetaAndAssetCtxs();
       
-      set({ extendedMarkets: marketList });
+      const spotMarketsMap = new Map<string, SpotMarketData>();
       
-      // Progressively fetch market stats with rate limiting (1 per second to be safe)
-      let index = 0;
-      const fetchNext = async () => {
-        if (index >= marketList.length) {
-          console.log('Extended progressive fetch completed');
-          return;
+      // Map spot pairs to market data
+      spotData.universe.forEach((pair, index) => {
+        const assetCtx = spotData.assetCtxs[index];
+        if (assetCtx && pair.isCanonical) {
+          // Extract base token from pair name (e.g., "HYPE/USDC" -> "HYPE")
+          const baseToken = pair.name.split('/')[0];
+          
+          spotMarketsMap.set(baseToken, {
+            symbol: baseToken,
+            price: parseFloat(assetCtx.markPx || assetCtx.midPx),
+            volume24h: parseFloat(assetCtx.dayNtlVlm || '0'),
+          });
         }
-        
-        const market = marketList[index];
-        const result = await updateExtendedMarketRate(market.name);
-        
-        if (result) {
-          const state = get();
-          const newExtendedRates = new Map(state.extendedRates);
-          newExtendedRates.set(result.symbol, result.rate);
-          set({ extendedRates: newExtendedRates });
-        }
-        
-        index++;
-        
-        // Wait 1 second before next request (60 requests per minute = 1 per second)
-        setTimeout(fetchNext, 1000);
-      };
+      });
       
-      // Start the progressive fetch
-      fetchNext();
+      console.log('Spot markets fetched:', spotMarketsMap.size);
+      set({ spotMarkets: spotMarketsMap });
     } catch (error) {
-      console.error('Error in progressive Extended fetch:', error);
+      console.error('Error fetching spot markets:', error);
+    }
+  },
+
+  fetchLighterSpotMarkets: async () => {
+    try {
+      console.log('Fetching Lighter spot market data...');
+      const { spotMarkets } = await getLighterArbitrageData();
+      
+      console.log('Lighter spot markets fetched:', spotMarkets.size);
+      set({ lighterSpotMarkets: spotMarkets });
+    } catch (error) {
+      console.error('Error fetching Lighter spot markets:', error);
     }
   },
 
@@ -121,7 +120,7 @@ export const useFundingStore = create<FundingStore>((set, get) => ({
       return [];
     }
 
-    const { metaData, lighterRates, asterRates, extendedRates } = state;
+    const { metaData, lighterRates, asterRates } = state;
     const hyperliquidRates = new Map<string, number>();
 
     // Calculate multiplier based on timeframe
@@ -149,11 +148,10 @@ export const useFundingStore = create<FundingStore>((set, get) => ({
     const allSymbols = new Set([
       ...hyperliquidRates.keys(), 
       ...lighterRates.keys(),
-      ...asterRates.keys(),
-      ...extendedRates.keys()
+      ...asterRates.keys()
     ]);
 
-    console.log(`Calculated ${timeframe} rates - Hyperliquid: ${hyperliquidRates.size}, Lighter: ${lighterRates.size}, Aster: ${asterRates.size}, Extended: ${extendedRates.size}, Total symbols: ${allSymbols.size}`);
+    console.log(`Calculated ${timeframe} rates - Hyperliquid: ${hyperliquidRates.size}, Lighter: ${lighterRates.size}, Aster: ${asterRates.size}, Total symbols: ${allSymbols.size}`);
 
     // Build funding rates array with all exchanges
     const fundingRates: FundingRate[] = [];
@@ -161,12 +159,10 @@ export const useFundingStore = create<FundingStore>((set, get) => ({
       const hlRate = hyperliquidRates.get(symbol);
       const lighterRate = lighterRates.get(symbol);
       const asterRate = asterRates.get(symbol);
-      const extendedRate = extendedRates.get(symbol);
       
       // Apply multiplier to all rates
       const adjustedLighterRate = lighterRate !== undefined ? lighterRate * multiplier : null;
       const adjustedAsterRate = asterRate !== undefined ? asterRate * multiplier : null;
-      const adjustedExtendedRate = extendedRate !== undefined ? extendedRate * multiplier : null;
       
       fundingRates.push({
         symbol,
@@ -174,7 +170,6 @@ export const useFundingStore = create<FundingStore>((set, get) => ({
           hyperliquid: hlRate ?? null,
           lighter: adjustedLighterRate,
           aster: adjustedAsterRate,
-          extended: adjustedExtendedRate,
         },
       });
     });

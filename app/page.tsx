@@ -13,7 +13,6 @@ const exchanges: Exchange[] = [
   { id: 'hyperliquid', name: 'Hyperliquid', type: 'usdt' },
   { id: 'lighter', name: 'Lighter', type: 'usdt' },
   { id: 'aster', name: 'Aster', type: 'usdt' },
-  { id: 'extended', name: 'Extended', type: 'usdt' },
 ];
 
 export default function Home() {

@@ -83,20 +83,6 @@ export function FundingRatesTable({ data, exchanges, timeframe, showFavorites = 
                         className="w-5 h-5"
                       />
                     )}
-                    {exchange.id === 'aster' && (
-                      <img 
-                        src="https://s2.coinmarketcap.com/static/img/coins/64x64/36341.png" 
-                        alt="Aster"
-                        className="w-5 h-5"
-                      />
-                    )}
-                    {exchange.id === 'extended' && (
-                      <img 
-                        src="https://app.extended.exchange/assets/favicon/apple-touch-icon.png" 
-                        alt="Extended"
-                        className="w-5 h-5"
-                      />
-                    )}
                     {exchange.name}
                   </div>
                 </TableHead>
