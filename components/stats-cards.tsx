@@ -4,7 +4,7 @@ import { useFundingStore } from "@/lib/store/funding-store";
 import { useEffect, useMemo } from "react";
 
 export function StatsCards() {
-  const { metaData, lighterRates, asterRates, extendedRates } = useFundingStore();
+  const { metaData, lighterRates, asterRates } = useFundingStore();
 
   const stats = useMemo(() => {
     if (!metaData) return null;
@@ -20,7 +20,6 @@ export function StatsCards() {
     
     lighterRates.forEach((rate) => allRates.push(rate));
     asterRates.forEach((rate) => allRates.push(rate));
-    extendedRates.forEach((rate) => allRates.push(rate));
 
     if (allRates.length === 0) return null;
 
@@ -33,7 +32,7 @@ export function StatsCards() {
       btcVolWeighted: avgRate * 1.02,
       ethVolWeighted: avgRate * 0.98,
     };
-  }, [metaData, lighterRates, asterRates, extendedRates]);
+  }, [metaData, lighterRates, asterRates]);
 
   const formatRate = (rate: number) => {
     return `${(rate * 100).toFixed(4)}%`;
